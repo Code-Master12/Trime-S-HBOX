@@ -73,8 +73,8 @@ function HBOX:ToggleHitbox(size)
     end
 end
 
-function HBOX:ToggleHBVisible()
-    hitboxVisible = not hitboxVisible
+function HBOX:SetHBVisible(visible)
+    hitboxVisible = visible
     for i, v in pairs(Players:GetPlayers()) do
         if v.Name ~= Players.LocalPlayer.Name then
             pcall(function()
