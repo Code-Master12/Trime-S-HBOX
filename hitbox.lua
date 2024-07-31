@@ -4,30 +4,9 @@ local RunService = game:GetService("RunService")
 local HBOX = {}
 
 local hitboxEnabled = false
+local hitboxVisible = true
 local headSize = 2
 local connection
-local counter = 0
-
-local function CreateHitbox(player)
-    if player ~= LocalPlayer and player.Character then
-        local highlight = Instance.new("Highlight")
-        highlight.Adornee = player.Character
-        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        highlight.FillColor = Color3.new(1, 0, 0)
-        highlight.FillTransparency = 0.5
-        highlight.OutlineColor = Color3.new(0, 1, 0)
-        highlight.OutlineTransparency = 0
-        highlight.Parent = player.Character
-        highlights[player] = highlight
-    end
-end
-
-local function RemoveHitbox(player)
-    if highlights[player] then
-        highlights[player]:Destroy()
-        highlights[player] = nil
-    end
-end
 
 function HBOX:EnableHitbox(size)
     hitboxEnabled = true
@@ -44,7 +23,7 @@ function HBOX:EnableHitbox(size)
                     local hrp = v.Character and v.Character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         hrp.Size = Vector3.new(headSize, headSize, headSize)
-                        hrp.Transparency = 0.7
+                        hrp.Transparency = hitboxVisible and 0.7 or 1
                         hrp.BrickColor = BrickColor.new("Really blue")
                         hrp.Material = Enum.Material.Neon
                         hrp.CanCollide = false
@@ -94,16 +73,30 @@ function HBOX:ToggleHitbox(size)
     end
 end
 
+function HBOX:ToggleHBVisible()
+    hitboxVisible = not hitboxVisible
+    for i, v in pairs(Players:GetPlayers()) do
+        if v.Name ~= Players.LocalPlayer.Name then
+            pcall(function()
+                local hrp = v.Character and v.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.Transparency = hitboxVisible and 0.7 or 1
+                end
+            end)
+        end
+    end
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Hitbox",
+        Text = hitboxVisible and "Hitbox Visible!" or "Hitbox Hidden!",
+    })
+end
+
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function()
         if hitboxEnabled then
-            CreateHitbox(player)
+            HBOX:EnableHitbox(headSize)
         end
     end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    RemoveHitbox(player)
 end)
 
 return HBOX
